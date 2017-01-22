@@ -52,12 +52,12 @@ struct Stack {
   Stack &pop(void);
 };
 
-struct Point {
+struct Vec2i {
   unsigned char x : 3;
   unsigned char y : 3;
 
-  Point();
-  Point(unsigned char _x, unsigned char _y);
+  Vec2i();
+  Vec2i(unsigned char _x, unsigned char _y);
 };
 
 struct Operation {

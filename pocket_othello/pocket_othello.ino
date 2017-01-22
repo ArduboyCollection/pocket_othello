@@ -1,16 +1,16 @@
-#include "Arduboy.h"
 #include "data.h"
 #include "logic.h"
 #include "visual.h"
+#include <Arduboy2.h>
 
-static Arduboy arduboy;
+static Arduboy2 arduboy;
 
 static Stack S;
 static Operation P;
 static uint8_t T = 0;
 
 static void intro(void) {
-  for (int i = -8; i < 28; i = i + 2) {
+  for (char i = -8; i < 28; i = i + 2) {
     arduboy.clear();
     arduboy.setCursor(22, i);
     arduboy.print("Pocket Othello");
@@ -117,7 +117,7 @@ static bool inputMain(void) {
       else ++P.y;
       break;
     case A_BUTTON:
-      if (place(&S.bottom(), &P, P.currentSide(), P.x, P.y, true))
+      if (place(&S.bottom(), &P, P.currentSide(), P.x, P.y, true) != 0)
         return true;
       break;
     case B_BUTTON:

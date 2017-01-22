@@ -1,50 +1,54 @@
 #include "logic.h"
 #include <stdlib.h>
 
-static Point LEVEL0[] = {
-  Point(0, 0), Point(7, 0), Point(7, 7), Point(0, 7)
+static Vec2i LEVEL0[] = {
+  Vec2i(0, 0), Vec2i(7, 0), Vec2i(7, 7), Vec2i(0, 7)
 };
 
-static Point LEVEL1[] = {
-  Point(2, 2), Point(3, 2), Point(4, 2),
-  Point(5, 2), Point(5, 3), Point(5, 4),
-  Point(5, 5), Point(4, 5), Point(3, 5),
-  Point(2, 5), Point(2, 4), Point(2, 3)
+static Vec2i LEVEL1[] = {
+  Vec2i(2, 2), Vec2i(3, 2), Vec2i(4, 2),
+  Vec2i(5, 2), Vec2i(5, 3), Vec2i(5, 4),
+  Vec2i(5, 5), Vec2i(4, 5), Vec2i(3, 5),
+  Vec2i(2, 5), Vec2i(2, 4), Vec2i(2, 3)
 };
 
-static Point LEVEL2[] = {
-  Point(3, 1), Point(4, 1),
-  Point(6, 3), Point(6, 4),
-  Point(4, 6), Point(3, 6),
-  Point(1, 4), Point(1, 3)
+static Vec2i LEVEL2[] = {
+  Vec2i(3, 1), Vec2i(4, 1),
+  Vec2i(6, 3), Vec2i(6, 4),
+  Vec2i(4, 6), Vec2i(3, 6),
+  Vec2i(1, 4), Vec2i(1, 3)
 };
 
-static Point LEVEL3[] = {
-  Point(2, 1), Point(5, 1),
-  Point(6, 2), Point(6, 5),
-  Point(5, 6), Point(2, 6),
-  Point(1, 5), Point(1, 2)
+static Vec2i LEVEL3[] = {
+  Vec2i(2, 1), Vec2i(5, 1),
+  Vec2i(6, 2), Vec2i(6, 5),
+  Vec2i(5, 6), Vec2i(2, 6),
+  Vec2i(1, 5), Vec2i(1, 2)
 };
 
-static Point LEVEL4[] = {
-  Point(1, 0), Point(2, 0), Point(3, 0), Point(4, 0), Point(5, 0), Point(6, 0),
-  Point(7, 1), Point(7, 2), Point(7, 3), Point(7, 4), Point(7, 5), Point(7, 6),
-  Point(6, 7), Point(5, 7), Point(4, 7), Point(3, 7), Point(2, 7), Point(1, 7),
-  Point(0, 6), Point(0, 5), Point(0, 4), Point(0, 3), Point(0, 2), Point(0, 1)
+static Vec2i LEVEL4[] = {
+  Vec2i(1, 0), Vec2i(2, 0), Vec2i(3, 0), Vec2i(4, 0), Vec2i(5, 0), Vec2i(6, 0),
+  Vec2i(7, 1), Vec2i(7, 2), Vec2i(7, 3), Vec2i(7, 4), Vec2i(7, 5), Vec2i(7, 6),
+  Vec2i(6, 7), Vec2i(5, 7), Vec2i(4, 7), Vec2i(3, 7), Vec2i(2, 7), Vec2i(1, 7),
+  Vec2i(0, 6), Vec2i(0, 5), Vec2i(0, 4), Vec2i(0, 3), Vec2i(0, 2), Vec2i(0, 1)
 };
 
-static Point LEVEL5[] = {
-  Point(1, 1), Point(6, 1), Point(6, 6), Point(1, 6)
+static Vec2i LEVEL5[] = {
+  Vec2i(1, 1), Vec2i(6, 1), Vec2i(6, 6), Vec2i(1, 6)
 };
 
-static void swap(Point &l, Point &r) {
-  Point t = l;
+static void swap(Vec2i &l, Vec2i &r) {
+  Vec2i t = l;
   l = r;
   r = t;
 }
 
 static bool valid(unsigned char x, unsigned char y) {
   return x <= 7 && y <= 7;
+}
+
+static bool valid(char x, char y) {
+  return x >= 0 && y >= 0 && x <= 7 && y <= 7;
 }
 
 unsigned char place(Board* b, Operation* o, GridStates s, unsigned char x, unsigned char y, bool p) {
@@ -54,22 +58,24 @@ unsigned char place(Board* b, Operation* o, GridStates s, unsigned char x, unsig
   for (char j = -1; j <= 1; ++j) {
     for (char i = -1; i <= 1; ++i) {
       if (i == 0 && j == 0) continue;
-      char s = 0;
+      char t = 0;
       tx = x; ty = y;
       do {
         tx += i; ty += j;
-        if ((s == 0 || s == 1) && b->get(tx, ty) == GS_EMPTY) {
+        if (!valid(tx, ty))
           break;
-        } else if (s == 0 && b->get(tx, ty) == o->opponentSide()) {
-          ++s;
-        } else if (s == 1 && b->get(tx, ty) == o->opponentSide()) {
-          // Do nothing.
-        } else if (s == 1 && b->get(tx, ty) == o->currentSide()) {
-          ++s;
+        if ((t == 0 || t == 1) && b->get(tx, ty) == GS_EMPTY) {
+          break;
+        } else if (t == 0 && b->get(tx, ty) == o->currentSide()) {
+          break;
+        } else if (t == 0 && b->get(tx, ty) == o->opponentSide()) {
+          ++t;
+        } else if (t == 1 && b->get(tx, ty) == o->currentSide()) {
+          ++t;
           break;
         }
-      } while (valid(tx, ty));
-      if (s == 2) {
+      } while (true);
+      if (t == 2) {
         ++result;
         if (p) {
           while (tx != x || ty != y) {
@@ -109,7 +115,7 @@ bool turn(Board* b, Operation* o) {
 }
 
 void shuffle(void) {
-  for (int i = 0; i < 24; ++i) {
+  for (unsigned char i = 0; i < 24; ++i) {
     swap(LEVEL0[rand() % countof(LEVEL0)], LEVEL0[rand() % countof(LEVEL0)]);
     swap(LEVEL1[rand() % countof(LEVEL1)], LEVEL1[rand() % countof(LEVEL1)]);
     swap(LEVEL2[rand() % countof(LEVEL2)], LEVEL2[rand() % countof(LEVEL2)]);

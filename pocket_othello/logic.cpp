@@ -1,39 +1,44 @@
 #include "logic.h"
+#include <avr/pgmspace.h>
 #include <stdlib.h>
 
-static Vec2i LEVEL0[] = {
-  Vec2i(0, 0), Vec2i(7, 0), Vec2i(7, 7), Vec2i(0, 7)
+PROGMEM const static Vec2i LEVEL0[] = {
+  Vec2i(3, 3), Vec2i(4, 3), Vec2i(3, 4), Vec2i(4, 4)
 };
 
 static Vec2i LEVEL1[] = {
+  Vec2i(0, 0), Vec2i(7, 0), Vec2i(7, 7), Vec2i(0, 7)
+};
+
+static Vec2i LEVEL2[] = {
   Vec2i(2, 2), Vec2i(3, 2), Vec2i(4, 2),
   Vec2i(5, 2), Vec2i(5, 3), Vec2i(5, 4),
   Vec2i(5, 5), Vec2i(4, 5), Vec2i(3, 5),
   Vec2i(2, 5), Vec2i(2, 4), Vec2i(2, 3)
 };
 
-static Vec2i LEVEL2[] = {
+static Vec2i LEVEL3[] = {
   Vec2i(3, 1), Vec2i(4, 1),
   Vec2i(6, 3), Vec2i(6, 4),
   Vec2i(4, 6), Vec2i(3, 6),
   Vec2i(1, 4), Vec2i(1, 3)
 };
 
-static Vec2i LEVEL3[] = {
+static Vec2i LEVEL4[] = {
   Vec2i(2, 1), Vec2i(5, 1),
   Vec2i(6, 2), Vec2i(6, 5),
   Vec2i(5, 6), Vec2i(2, 6),
   Vec2i(1, 5), Vec2i(1, 2)
 };
 
-static Vec2i LEVEL4[] = {
+static Vec2i LEVEL5[] = {
   Vec2i(1, 0), Vec2i(2, 0), Vec2i(3, 0), Vec2i(4, 0), Vec2i(5, 0), Vec2i(6, 0),
   Vec2i(7, 1), Vec2i(7, 2), Vec2i(7, 3), Vec2i(7, 4), Vec2i(7, 5), Vec2i(7, 6),
   Vec2i(6, 7), Vec2i(5, 7), Vec2i(4, 7), Vec2i(3, 7), Vec2i(2, 7), Vec2i(1, 7),
   Vec2i(0, 6), Vec2i(0, 5), Vec2i(0, 4), Vec2i(0, 3), Vec2i(0, 2), Vec2i(0, 1)
 };
 
-static Vec2i LEVEL5[] = {
+static Vec2i LEVEL6[] = {
   Vec2i(1, 1), Vec2i(6, 1), Vec2i(6, 6), Vec2i(1, 6)
 };
 
@@ -49,6 +54,19 @@ static bool valid(unsigned char x, unsigned char y) {
 
 static bool valid(char x, char y) {
   return x >= 0 && y >= 0 && x <= 7 && y <= 7;
+}
+
+static int score(Board* b, Operation* o, GridStates s) {
+  int result = 0;
+  for (unsigned char i = 0; i < countof(LEVEL0); ++i) {
+    if (b->get(LEVEL0[i].x, LEVEL0[i].y) == s)
+      result += 5;
+  }
+  for (unsigned char i = 0; i < countof(LEVEL1); ++i) {
+    if (b->get(LEVEL1[i].x, LEVEL1[i].y) == s)
+      result += 10;
+  }
+  return result;
 }
 
 unsigned char place(Board* b, Operation* o, GridStates s, unsigned char x, unsigned char y, bool p) {
@@ -116,19 +134,17 @@ bool turn(Board* b, Operation* o) {
 
 void shuffle(void) {
   for (unsigned char i = 0; i < 24; ++i) {
-    swap(LEVEL0[rand() % countof(LEVEL0)], LEVEL0[rand() % countof(LEVEL0)]);
     swap(LEVEL1[rand() % countof(LEVEL1)], LEVEL1[rand() % countof(LEVEL1)]);
     swap(LEVEL2[rand() % countof(LEVEL2)], LEVEL2[rand() % countof(LEVEL2)]);
     swap(LEVEL3[rand() % countof(LEVEL3)], LEVEL3[rand() % countof(LEVEL3)]);
+    swap(LEVEL4[rand() % countof(LEVEL4)], LEVEL4[rand() % countof(LEVEL4)]);
+    swap(LEVEL5[rand() % countof(LEVEL5)], LEVEL5[rand() % countof(LEVEL5)]);
+    swap(LEVEL6[rand() % countof(LEVEL6)], LEVEL6[rand() % countof(LEVEL6)]);
   }
 }
 
 void think(Stack* s, Operation* o) {
   Board* b = &s->bottom();
-  for (unsigned char i = 0; i < countof(LEVEL0); ++i) {
-    if (place(b, o, o->currentSide(), LEVEL0[i].x, LEVEL0[i].y, true))
-      return;
-  }
   for (unsigned char i = 0; i < countof(LEVEL1); ++i) {
     if (place(b, o, o->currentSide(), LEVEL1[i].x, LEVEL1[i].y, true))
       return;
@@ -142,46 +158,50 @@ void think(Stack* s, Operation* o) {
       return;
   }
   for (unsigned char i = 0; i < countof(LEVEL4); ++i) {
-    if (place(b, o, o->currentSide(), LEVEL4[i].x, LEVEL4[i].y, false)) {
-      char dx = (LEVEL4[i].x == 0 || LEVEL4[i].x == 7) ? 0 : 1;
-      char dy = (LEVEL4[i].y == 0 || LEVEL4[i].y == 7) ? 0 : 1;
-      unsigned char s = 0;
-      char tx = LEVEL4[i].x, ty = LEVEL4[i].y;
+    if (place(b, o, o->currentSide(), LEVEL4[i].x, LEVEL4[i].y, true))
+      return;
+  }
+  for (unsigned char i = 0; i < countof(LEVEL5); ++i) {
+    if (place(b, o, o->currentSide(), LEVEL5[i].x, LEVEL5[i].y, false)) {
+      char dx = (LEVEL5[i].x == 0 || LEVEL5[i].x == 7) ? 0 : 1;
+      char dy = (LEVEL5[i].y == 0 || LEVEL5[i].y == 7) ? 0 : 1;
+      unsigned char t = 0;
+      char tx = LEVEL5[i].x, ty = LEVEL5[i].y;
       do {
         tx += dx; ty += dy;
         if (b->get(tx, ty) == o->opponentSide()) {
-          s |= 0x01;
+          t |= 0x01;
         } else if (b->get(tx, ty) == o->currentSide()) {
-          s |= 0x02;
+          t |= 0x02;
         } else if (b->get(tx, ty) == GS_EMPTY) {
-          s |= 0x04;
+          t |= 0x04;
           break;
         }
       } while (valid(tx, ty));
       dx = -dx; dy = -dy;
-      tx = LEVEL4[i].x, ty = LEVEL4[i].y;
+      tx = LEVEL5[i].x, ty = LEVEL5[i].y;
       do {
         tx += dx; ty += dy;
         if (b->get(tx, ty) == o->opponentSide()) {
-          s |= 0x10;
+          t |= 0x10;
         } else if (b->get(tx, ty) == o->currentSide()) {
-          s |= 0x20;
+          t |= 0x20;
         } else if (b->get(tx, ty) == GS_EMPTY) {
-          s |= 0x40;
+          t |= 0x40;
           break;
         }
       } while (valid(tx, ty));
-      if ((s & 0x01) != 0 && (s & 0x40) != 0) {
-        place(b, o, o->currentSide(), LEVEL4[i].x, LEVEL4[i].y, true);
+      if ((t & 0x01) != 0 && (t & 0x40) != 0) {
+        place(b, o, o->currentSide(), LEVEL5[i].x, LEVEL5[i].y, true);
         return;
-      } else if ((s & 0x10) != 0 && (s & 0x04) != 0) {
-        place(b, o, o->currentSide(), LEVEL4[i].x, LEVEL4[i].y, true);
+      } else if ((t & 0x10) != 0 && (t & 0x04) != 0) {
+        place(b, o, o->currentSide(), LEVEL5[i].x, LEVEL5[i].y, true);
         return;
       }
     }
   }
-  for (unsigned char i = 0; i < countof(LEVEL5); ++i) {
-    if (place(b, o, o->currentSide(), LEVEL3[i].x, LEVEL3[i].y, true))
+  for (unsigned char i = 0; i < countof(LEVEL6); ++i) {
+    if (place(b, o, o->currentSide(), LEVEL6[i].x, LEVEL6[i].y, true))
       return;
   }
   for (unsigned char i = 0; i < 8; ++i) {

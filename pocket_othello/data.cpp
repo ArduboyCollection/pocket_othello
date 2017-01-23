@@ -101,11 +101,12 @@ Board &Stack::bottom(void) {
   return nodes[0];
 }
 
-Board &Stack::peek(void) {
+Board &Stack::top(void) {
   return nodes[cursor];
 }
 
 Stack &Stack::push(void) {
+  nodes[cursor + 1] = nodes[cursor];
   ++cursor;
   return *this;
 }

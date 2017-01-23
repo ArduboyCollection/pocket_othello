@@ -47,7 +47,7 @@ struct Stack {
   unsigned char count(void);
   bool empty(void);
   Board &bottom(void);
-  Board &peek(void);
+  Board &top(void);
   Stack &push(void);
   Stack &pop(void);
 };

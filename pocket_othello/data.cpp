@@ -20,8 +20,22 @@ static unsigned long EEPROMReadlong(long address) {
   return ((four << 0) & 0xff) + ((three << 8) & 0xffff) + ((two << 16) & 0xffffff) + ((one << 24) & 0xffffffff);
 }
 
+GridStates opponent(GridStates s) {
+  if (s == GS_WHITE) return GS_BLACK;
+  if (s == GS_BLACK) return GS_WHITE;
+  return GS_EMPTY;
+}
+
 Board::Board() {
   clear();
+}
+
+Board &Board::init(void) {
+  set(3, 3, GS_WHITE);
+  set(4, 3, GS_BLACK);
+  set(3, 4, GS_BLACK);
+  set(4, 4, GS_WHITE);
+  return *this;
 }
 
 Board &Board::clear(void) {
@@ -71,51 +85,6 @@ unsigned char Board::count(unsigned char &c0, unsigned char &c1) {
   return result;
 }
 
-Stack::Stack() {
-  cursor = 0;
-}
-
-Stack &Stack::init(void) {
-  bottom().set(3, 3, GS_WHITE);
-  bottom().set(4, 3, GS_BLACK);
-  bottom().set(3, 4, GS_BLACK);
-  bottom().set(4, 4, GS_WHITE);
-  return *this;
-}
-
-Stack &Stack::clear(void) {
-  cursor = 0;
-  bottom().clear();
-  return *this;
-}
-
-unsigned char Stack::count(void) {
-  return cursor + 1;
-}
-
-bool Stack::empty(void) {
-  return cursor == 0;
-}
-
-Board &Stack::bottom(void) {
-  return nodes[0];
-}
-
-Board &Stack::top(void) {
-  return nodes[cursor];
-}
-
-Stack &Stack::push(void) {
-  nodes[cursor + 1] = nodes[cursor];
-  ++cursor;
-  return *this;
-}
-
-Stack &Stack::pop(void) {
-  --cursor;
-  return *this;
-}
-
 Vec2i::Vec2i() {
   x = y = 0;
 }
@@ -159,11 +128,11 @@ Operation &Operation::reset(void) {
 }
 
 GridStates Operation::currentSide(void) {
-  return playing == 0 ? GS_WHITE : GS_BLACK;
+  return (playing == 0) ? GS_WHITE : GS_BLACK;
 }
 
 GridStates Operation::opponentSide(void) {
-  return playing != 0 ? GS_WHITE : GS_BLACK;
+  return (playing != 0) ? GS_WHITE : GS_BLACK;
 }
 
 void load(Operation* o) {

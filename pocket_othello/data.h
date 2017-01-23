@@ -20,36 +20,19 @@ enum GridStates {
   GS_BLACK
 };
 
+GridStates opponent(GridStates s);
+
 struct Board {
   unsigned char fill[8];
   unsigned char color[8];
 
   Board();
 
+  Board &init(void);
   Board &clear(void);
   GridStates get(unsigned char x, unsigned char y);
   Board &set(unsigned char x, unsigned char y, GridStates s);
   unsigned char count(unsigned char &c0, unsigned char &c1);
-};
-
-#ifndef STACK_SIZE
-# define STACK_SIZE 32
-#endif /* STACK_SIZE */
-
-struct Stack {
-  unsigned char cursor;
-  Board nodes[STACK_SIZE];
-
-  Stack();
-
-  Stack &init(void);
-  Stack &clear(void);
-  unsigned char count(void);
-  bool empty(void);
-  Board &bottom(void);
-  Board &top(void);
-  Stack &push(void);
-  Stack &pop(void);
 };
 
 struct Vec2i {

@@ -3,11 +3,10 @@
 #include "visual.h"
 #include <Arduboy2.h>
 
-static Arduboy2 arduboy;
-
-static Stack S;
+static Board B;
 static Operation P;
 static uint8_t T = 0;
+static Arduboy2 arduboy;
 
 static void intro(void) {
   for (char i = -8; i < 28; i = i + 2) {
@@ -59,8 +58,8 @@ static void inputMenu(void) {
       P.chosen = P.chosen == 0 ? 1 : 0;
       break;
     case A_BUTTON:
-      S.clear();
-      S.init();
+      B.clear();
+      B.init();
       P.reset();
       P.state = GS_MAIN;
       break;
@@ -117,7 +116,7 @@ static bool inputMain(void) {
       else ++P.y;
       break;
     case A_BUTTON:
-      if (place(&S.bottom(), &P, P.currentSide(), P.x, P.y, true) != 0)
+      if (place(&B, P.currentSide(), P.x, P.y, true) != 0)
         return true;
       break;
     case B_BUTTON:
@@ -133,14 +132,14 @@ static void drawMain(void) {
   arduboy.drawBitmap(0, 0, SPRITE_BOARD, 64, 64, WHITE);
   for (uint8_t i = 0; i < 8; ++i) {
     for (uint8_t j = 0; j < 8; ++j) {
-      GridStates s = S.bottom().get(i, j);
+      GridStates s = B.get(i, j);
       if (s == GS_WHITE)
         arduboy.drawBitmap(xoff + 7 * i, yoff + 7 * j, SPRITE_WHITE, 8, 8, WHITE);
       else if (s == GS_BLACK)
         arduboy.drawBitmap(xoff + 7 * i, yoff + 7 * j, SPRITE_BLACK, 8, 8, WHITE);
     }
   }
-  if (T >= 15)
+  if (T >= 15 && P.state == GS_MAIN && P.chosen == P.playing)
     arduboy.drawBitmap(xoff + 7 * P.x, yoff + 7 * P.y, SPRITE_CURSOR, 8, 8, WHITE);
   arduboy.drawBitmap(64 + 23, 8, SPRITE_BLACK, 8, 8, WHITE);
   arduboy.setCursor(64 + 32, 8);
@@ -161,8 +160,8 @@ static void drawMain(void) {
 static void inputOver(void) {
   switch (input()) {
     case A_BUTTON:
-      S.clear();
-      S.init();
+      B.clear();
+      B.init();
       P.reset();
       P.state = GS_MAIN;
       break;
@@ -196,7 +195,7 @@ void setup() {
   arduboy.initRandomSeed();
   arduboy.setFrameRate(30);
   intro();
-  S.init();
+  B.init();
   shuffle();
   load(&P);
 }
@@ -217,7 +216,7 @@ void loop() {
     case GS_MAIN:
       if (P.playing == P.chosen) {
         if (inputMain()) {
-          if (turn(&S.bottom(), &P)) {
+          if (turn(&B, &P)) {
             if (P.chosen == 1 && P.c1 > P.c0) { P.state = GS_WIN; ++P.total; ++P.won; save(&P); }
             else if (P.chosen == 1 && P.c1 < P.c0) { P.state = GS_LOSE; ++P.total; save(&P); }
             else if (P.chosen == 0 && P.c0 > P.c1) { P.state = GS_WIN; ++P.total; ++P.won; save(&P); }
@@ -226,8 +225,8 @@ void loop() {
           }
         }
       } else {
-        think(&S, &P);
-        if (turn(&S.bottom(), &P)) {
+        think(&B, &P);
+        if (turn(&B, &P)) {
           if (P.chosen == 1 && P.c1 > P.c0) { P.state = GS_WIN; ++P.total; ++P.won; save(&P); }
           else if (P.chosen == 1 && P.c1 < P.c0) { P.state = GS_LOSE; ++P.total; save(&P); }
           else if (P.chosen == 0 && P.c0 > P.c1) { P.state = GS_WIN; ++P.total; ++P.won; save(&P); }

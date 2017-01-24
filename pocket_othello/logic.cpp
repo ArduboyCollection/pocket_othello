@@ -1,4 +1,5 @@
 #include "logic.h"
+#include <Arduino.h>
 #include <avr/pgmspace.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -100,6 +101,45 @@ static int score(Board* b, unsigned char x, unsigned char y, GridStates s) {
     if (c1 == 1 && o1 == 0) result += 12;
     if (c2 == 1 && o2 == 0) result += 12;
     if (c3 == 1 && o3 == 0) result += 12;
+    do {
+      GridStates cs = s;
+      GridStates os = opponent(s);
+      char dx = (x == 0 || x == 7) ? 0 : 1;
+      char dy = (y == 0 || y == 7) ? 0 : 1;
+      unsigned char t = 0;
+      char tx = x, ty = y;
+      do {
+        tx += dx; ty += dy;
+        if (b->get(tx, ty) == os) {
+          t |= 0x01;
+          break;
+        } else if (b->get(tx, ty) == cs) {
+          t |= 0x02;
+        } else if (b->get(tx, ty) == GS_EMPTY) {
+          t |= 0x04;
+          break;
+        }
+      } while (valid(tx, ty));
+      dx = -dx; dy = -dy;
+      tx = x, ty = y;
+      do {
+        tx += dx; ty += dy;
+        if (b->get(tx, ty) == os) {
+          t |= 0x10;
+          break;
+        } else if (b->get(tx, ty) == cs) {
+          t |= 0x20;
+        } else if (b->get(tx, ty) == GS_EMPTY) {
+          t |= 0x40;
+          break;
+        }
+      } while (valid(tx, ty));
+      if ((t & 0x01) != 0 && (t & 0x40) != 0) {
+        result -= 12;
+      } else if ((t & 0x10) != 0 && (t & 0x04) != 0) {
+        result -= 12;
+      }
+    } while (false);
   }
   return result;
 }
@@ -109,8 +149,19 @@ static void think(Board* b, Board* r, Operation* o, unsigned char x, unsigned ch
   if (place(&t, o->currentSide(), x, y, true)) {
     int ret = score(&t, x, y, o->currentSide());
     if (ret > sco) {
+      Serial.print(x);
+      Serial.print(", ");
+      Serial.print(y);
+      Serial.print(" > ");
+      Serial.println(ret);
       *r = t;
       sco = ret;
+    } else {
+      Serial.print(x);
+      Serial.print(", ");
+      Serial.print(y);
+      Serial.print(" < ");
+      Serial.println(ret);
     }
   }
 }
@@ -190,6 +241,7 @@ void shuffle(void) {
 }
 
 void think(Board* b, Operation* o) {
+  Serial.println("-----");
   Board r;
   int sco = INT_MIN;
   for (unsigned char i = 0; i < countof(LEVEL1); ++i) {

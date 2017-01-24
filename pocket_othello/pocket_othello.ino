@@ -191,6 +191,7 @@ static void drawOver(void) {
 }
 
 void setup() {
+  Serial.begin(9600);
   arduboy.begin();
   arduboy.initRandomSeed();
   arduboy.setFrameRate(30);
@@ -248,5 +249,6 @@ void loop() {
       break;
   }
 
+  Serial.write(arduboy.getBuffer(), 128 * 64 / 8);
   arduboy.display();
 }

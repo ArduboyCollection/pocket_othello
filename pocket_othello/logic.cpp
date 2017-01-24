@@ -149,19 +149,23 @@ static void think(Board* b, Board* r, Operation* o, unsigned char x, unsigned ch
   if (place(&t, o->currentSide(), x, y, true)) {
     int ret = score(&t, x, y, o->currentSide());
     if (ret > sco) {
+      #ifdef SHOW_DEBUG
       Serial.print(x);
       Serial.print(", ");
       Serial.print(y);
       Serial.print(" > ");
       Serial.println(ret);
+      #endif /* SHOW_DEBUG */
       *r = t;
       sco = ret;
     } else {
+      #ifdef SHOW_DEBUG
       Serial.print(x);
       Serial.print(", ");
       Serial.print(y);
       Serial.print(" < ");
       Serial.println(ret);
+      #endif /* SHOW_DEBUG */
     }
   }
 }
@@ -241,7 +245,9 @@ void shuffle(void) {
 }
 
 void think(Board* b, Operation* o) {
+  #ifdef SHOW_DEBUG
   Serial.println("-----");
+  #endif /* SHOW_DEBUG */
   Board r;
   int sco = INT_MIN;
   for (unsigned char i = 0; i < countof(LEVEL1); ++i) {

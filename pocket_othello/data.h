@@ -5,6 +5,8 @@
 # define countof(A) (sizeof(A) / sizeof(*(A)))
 #endif /* countof */
 
+extern bool debug;
+
 enum GameStates {
   GS_MENU,
   GS_MAIN,

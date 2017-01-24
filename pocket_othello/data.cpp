@@ -1,6 +1,8 @@
 #include "data.h"
 #include <EEPROM.h>
 
+bool debug = false;
+
 static void EEPROMWritelong(int address, unsigned long value) {
   unsigned char four = (value & 0xff);
   unsigned char three = ((value >> 8) & 0xff);
@@ -92,7 +94,7 @@ Vec2i::Vec2i() {
 Vec2i::Vec2i(unsigned char _x, unsigned char _y) {
   x = _x; y = _y;
 }
-  
+
 Operation::Operation() {
   clear();
 }

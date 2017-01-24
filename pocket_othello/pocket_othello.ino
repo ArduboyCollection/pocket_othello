@@ -190,6 +190,19 @@ static void drawOver(void) {
   }
 }
 
+static void serialControl(void) {
+  if (Serial.available()) {
+    int d = Serial.read();
+    if (d == 's') {
+      debug = false;
+      Serial.println("Debug Off");
+    } else if (d == 'd') {
+      debug = true;
+      Serial.println("Debug On");
+    }
+  }
+}
+
 void setup() {
   Serial.begin(9600);
   arduboy.begin();
@@ -249,6 +262,8 @@ void loop() {
       break;
   }
 
-  Serial.write(arduboy.getBuffer(), 128 * 64 / 8);
+  serialControl();
+  if (!debug)
+    Serial.write(arduboy.getBuffer(), 128 * 64 / 8);
   arduboy.display();
 }

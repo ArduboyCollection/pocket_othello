@@ -3,10 +3,6 @@
 
 #include "data.h"
 
-#ifndef SHOW_DEBUG
-//# define SHOW_DEBUG
-#endif /* SHOW_DEBUG */
-
 unsigned char place(Board* b, GridStates s, unsigned char x, unsigned char y, bool p);
 bool placeable(Board* b, GridStates s);
 bool turn(Board* b, Operation* o);

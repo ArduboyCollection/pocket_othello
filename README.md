@@ -12,9 +12,10 @@ Pocket Othello is an Othello game for the Arduboy.
 
 ## Installation
 
-### 1. Use the HEX
+### 1. Use the precompiled
 
-* Use an Arduboy HEX uploader to upload the `/hex/pocket_othello.hex` to your Arduboy.
+* Use an Arduboy uploader to upload the `/out/pocket_othello.hex` to your Arduboy.
+* Or use an Arduboy manager to upload the `/out/pocket_othello.arduboy` package.
 
 ### 2. Use the sketch
 

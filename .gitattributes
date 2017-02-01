@@ -1,2 +1,3 @@
 *.c linguist-language=Arduino
-*.h linguist-language=my-header-test
+*.cpp linguist-language=Arduino
+*.h linguist-language=Arduino

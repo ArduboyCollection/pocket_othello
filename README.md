@@ -8,7 +8,7 @@
 
 Pocket Othello is an Othello game for the Arduboy.
 
-![](docs/run.jpg)
+![](img/run.jpg)
 
 ## Installation
 
